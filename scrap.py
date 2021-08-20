@@ -1,6 +1,6 @@
 import requests
 import re
-from scrap_web import dadosPrincipaisProcesso, partesProcesso
+from scrap_web import dadosPrincipaisProcesso, partesProcesso, movimentacoesProcesso
 
 # 0705677-72.2019.8.02.  (0001 = numero Unificado)
 
@@ -23,8 +23,10 @@ def numeroProcessoURL(numeroProcesso):
 
 def dados_processo(url_search):
     request = requests.get(url_search)
-    principais = dadosPrincipaisProcesso(request.text)
-    partes = partesProcesso(request.text)
-
+    html_text = request.text.replace('&nbsp;', '')
+    principais = dadosPrincipaisProcesso(html_text)
+    partes = partesProcesso(html_text)
+    movimentacoes = movimentacoesProcesso(html_text)
+    print(movimentacoes)
 
 numeroProcessoURL(numeroProcesso)
