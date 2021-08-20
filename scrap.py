@@ -1,6 +1,8 @@
+import html
+import json
 import requests
 import re
-from scrap_web import dadosPrincipaisProcesso, partesProcesso, movimentacoesProcesso
+from scrap_web import dadosPrincipaisProcesso, partesProcesso, movimentacoesProcesso, peticoesProcesso
 
 # 0705677-72.2019.8.02.  (0001 = numero Unificado)
 
@@ -10,6 +12,7 @@ https://www2.tjal.jus.br/cpopg/search.do;jsessionid=21EEB739CFE070D504F34C97BEB0
 
 """
 numeroProcesso = '0705677-72.2019.8.02.0001'
+processoDados = {}
 
 
 def numeroProcessoURL(numeroProcesso):
@@ -23,10 +26,25 @@ def numeroProcessoURL(numeroProcesso):
 
 def dados_processo(url_search):
     request = requests.get(url_search)
-    html_text = request.text.replace('&nbsp;', '')
+
+    html_text = html.unescape(request.text)
+
+    html_text = html_text.replace('&nbsp;', '')
+
     principais = dadosPrincipaisProcesso(html_text)
     partes = partesProcesso(html_text)
     movimentacoes = movimentacoesProcesso(html_text)
-    print(movimentacoes)
+    peticoes = peticoesProcesso(html_text)
+
+    processoDados[numeroProcesso] = {}
+    processoDados[numeroProcesso]['principais'] = principais
+    processoDados[numeroProcesso]['partes'] = partes
+    processoDados[numeroProcesso]['movimentacoes'] = movimentacoes
+    processoDados[numeroProcesso]['peticoes'] = peticoes
+
+    with open("unicodeFile.json", "w", encoding='utf-8') as write_file:
+        json.dump(processoDados, write_file, ensure_ascii=False)
+    print("Done writing JSON serialized Unicode Data as-is into file")
+
 
 numeroProcessoURL(numeroProcesso)

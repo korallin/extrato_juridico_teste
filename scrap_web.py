@@ -113,4 +113,20 @@ def movimentacoesProcesso(html_text):
 
         dadosMovimentacoesProcesso[data_movimentacao]['subdescricao'] = subdescricao
 
-    return json.dumps(dadosMovimentacoesProcesso)
+    # return json.dumps(dadosMovimentacoesProcesso)
+    return dadosMovimentacoesProcesso
+
+
+def peticoesProcesso(html_text):
+    dadosPeticoesProcesso = {}
+    # \t<tr class="fundo.{5,6}">[\s\t]*<td[^>]*>((.|\s)+?)</td>
+    partes = r'\t<tr class="fundo.{5,6}">((.|\s)+?)</tr>'
+    for parte in re.findall(partes, html_text):
+        parte_completa = ' '.join(parte)
+        data_peticao = re.search(r'\t<td width="140"[^>]*>((.|\s)+?)</td>', parte_completa).group(1).strip()
+        tipo_peticao = re.search(r'\t<td width="\*"[^>]*>((.|\s)+?)</td>', parte_completa).group(1).strip()
+
+        dadosPeticoesProcesso[data_peticao] = {}
+        dadosPeticoesProcesso[data_peticao]['tipo'] = tipo_peticao
+
+    return dadosPeticoesProcesso
