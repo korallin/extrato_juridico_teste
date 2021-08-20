@@ -38,9 +38,9 @@ def dados_processo(url_search):
 
     processoDados[numeroProcesso] = {}
     processoDados[numeroProcesso]['principais'] = principais
-    processoDados[numeroProcesso]['partes'] = partes
-    processoDados[numeroProcesso]['movimentacoes'] = movimentacoes
-    processoDados[numeroProcesso]['peticoes'] = peticoes
+    processoDados[numeroProcesso]['partes_processo'] = partes
+    processoDados[numeroProcesso]['movimentacoes_processo'] = movimentacoes
+    processoDados[numeroProcesso]['peticoes_processo'] = peticoes
 
     with open("unicodeFile.json", "w", encoding='utf-8') as write_file:
         json.dump(processoDados, write_file, ensure_ascii=False)

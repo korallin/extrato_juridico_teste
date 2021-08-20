@@ -7,17 +7,17 @@ import re
 def dadosPrincipaisProcesso(html_text):
     dadosPrincipais = {}
 
-    dadosPrincipais['numero_processo_regex'] = re.search(r'<span id="numeroProcesso"[^>]*>([^<]*)</span>',
-                                                         html_text).group(1).strip()
-    dadosPrincipais['classe_processo_regex'] = re.search(r'<span id="classeProcesso"[^>]*>([^<]*)</span>',
-                                                         html_text).group(1).strip()
-    dadosPrincipais['assunto_processo_regex'] = re.search(r'<span id="assuntoProcesso"[^>]*>([^<]*)</span>',
-                                                          html_text).group(1).strip()
-    dadosPrincipais['foro_processo_regex'] = re.search(r'<span id="foroProcesso"[^>]*>([^<]*)</span>', html_text).group(
+    dadosPrincipais['numero_processo'] = re.search(r'<span id="numeroProcesso"[^>]*>([^<]*)</span>',
+                                                   html_text).group(1).strip()
+    dadosPrincipais['classe_processo'] = re.search(r'<span id="classeProcesso"[^>]*>([^<]*)</span>',
+                                                   html_text).group(1).strip()
+    dadosPrincipais['assunto_processo'] = re.search(r'<span id="assuntoProcesso"[^>]*>([^<]*)</span>',
+                                                    html_text).group(1).strip()
+    dadosPrincipais['foro_processo'] = re.search(r'<span id="foroProcesso"[^>]*>([^<]*)</span>', html_text).group(
         1).strip()
-    dadosPrincipais['vara_processo_regex'] = re.search(r'<span id="varaProcesso"[^>]*>([^<]*)</span>', html_text).group(
+    dadosPrincipais['vara_processo'] = re.search(r'<span id="varaProcesso"[^>]*>([^<]*)</span>', html_text).group(
         1).strip()
-    dadosPrincipais['juiz_processo_regex'] = re.search(r'<span id="juizProcesso"[^>]*>([^<]*)</span>', html_text).group(
+    dadosPrincipais['juiz_processo'] = re.search(r'<span id="juizProcesso"[^>]*>([^<]*)</span>', html_text).group(
         1).strip()
     dadosPrincipais['distribuicao'] = re.search(r'<div id="dataHoraDistribuicaoProcesso">((.|\s)+?)</div>',
                                                 html_text).group(1).strip()
@@ -39,6 +39,7 @@ def dadosPrincipaisProcesso(html_text):
 
 def partesProcesso(html_text):
     dadosPartesProcesso = {}
+    dadosPartesProcesso['partes'] = []
     confrontante = []
     terceiros = []
     # html_text = html_text.replace('&nbsp;', '')
@@ -46,54 +47,50 @@ def partesProcesso(html_text):
     partes = r'<tr class="fundoClaro"[^>]*>[^<]*<td valign="top"[^>]*>((.|\s)+?)(\<\/tr\>)'
     for parte in re.findall(partes, html_text):
         parte_completa = ' '.join(parte)
+        tipoDeParticipacao = re.search(r'<span class="mensagemExibindo tipoDeParticipacao">((.|\s)+?)</span>',
+                                       parte_completa).group(1).strip()
+        nomeParteEAdvogado = re.search(r'<td class="nomeParteEAdvogado"[^>]*>((.|\s)+?)</td>', parte_completa).group(
+            1).strip()
 
-        autor = re.search(
-            r'<td class="nomeParteEAdvogado"[^>]*>([^<]*)<[^<]*<span class="mensagemExibindo">([^<]*)</span>([^<]*)',
-            parte_completa)
-        autora = re.search(r'Autora</span>[\s</\w>]+<td class="nomeParteEAdvogado"[^>]*>((.|\s)+?)</td>',
-                           parte_completa)
-        pessoa_re = re.search(r'Ré</span>[\s</\w>]+<td class="nomeParteEAdvogado"[^>]*>((.|\s)+?)</td>', parte_completa)
+        if 'span' in nomeParteEAdvogado:
 
-        confrontan = re.search(r'Confrontan</span>[\s</\w>]+<td class="nomeParteEAdvogado"[^>]*>((.|\s)+?)</td>',
-                               parte_completa)
-        terceiro_i = re.search(r'Terceiro I</span>[\s</\w>]+<td class="nomeParteEAdvogado"[^>]*>((.|\s)+?)</td>',
-                               parte_completa)
+            autor = re.search(r'<td class="nomeParteEAdvogado"[^>]*>((.|\s)+?)<br />', parte_completa).group(1).strip()
+            row = {
+                'nome': autor,
+                'tipo_participacao': tipoDeParticipacao
+            }
 
-        if confrontan:
-            pessoa_confrontan = confrontan.group(1).strip().title()
-            if not pessoa_confrontan in confrontante:
-                confrontante.append(pessoa_confrontan)
+            if not row in dadosPartesProcesso['partes']:
+                dadosPartesProcesso['partes'].append(row)
 
-        if terceiro_i:
-            pessoa_terceiro_i = terceiro_i.group(1).strip().title()
-            if not pessoa_terceiro_i in terceiros:
-                terceiros.append(pessoa_terceiro_i)
+            nomeParteEAdvogado += '<end>'
 
-        if pessoa_re:
-            dadosPartesProcesso['re'] = pessoa_re.group(1).strip()
+            advogado = re.search(r'<span class="mensagemExibindo">((.|\s)+?)</span>((.|\s)+?)<end>',
+                                 nomeParteEAdvogado).groups()
+            nomeParteEAdvogado = advogado[0].strip() + ' ' + advogado[2].strip()
+            tipoDeParticipacao = 'Advogado'
 
-        if autora:
-            dadosPartesProcesso['autora'] = autora.group(1).strip()
+        row = {
+            'nome': nomeParteEAdvogado.strip(),
+            'tipo_participacao': tipoDeParticipacao
+        }
 
-        if autor:
-            autor = autor.groups()
-            dadosPartesProcesso['autor'] = autor[0].strip() + '\n' + autor[1].strip() + f' {autor[2].strip()}'
-
-    # tipo_re = re.search()
-    dadosPartesProcesso['confrontante'] = confrontante
-    dadosPartesProcesso['terceiros'] = terceiros
+        if not row in dadosPartesProcesso['partes']:
+            dadosPartesProcesso['partes'].append(row)
 
     return dadosPartesProcesso
 
 
 def movimentacoesProcesso(html_text):
     dadosMovimentacoesProcesso = {}
+    dadosMovimentacoesProcesso['movimentacoes'] = []
 
     partes = r'<tr class="fundo.{5,6} containerMovimentacao"[^>]*>((.|\s)+?)</tr>'
     for parte in re.findall(partes, html_text):
         parte_completa = ' '.join(parte)
+
         data_movimentacao = re.search(r'<td class="dataMovimentacao"[^>]*>((.|\s)+?)</td>', parte_completa).group(
-            1).strip().replace('/', '')
+            1).strip()
 
         descricao_movimentacao_titulo = re.search(r'<td class="descricaoMovimentacao"[^>]*>((.|\s)+?)<br />',
                                                   parte_completa)
@@ -105,28 +102,33 @@ def movimentacoesProcesso(html_text):
         subdescricao = re.search(r'<td class="descricaoMovimentacao"[^>]*>(.|\s)+?<span[^>]*>(('
                                  r'.|\s)+?)</span>', parte_completa).group(2).strip()
 
-        dadosMovimentacoesProcesso[data_movimentacao] = {}
+        row = {
+            'data': data_movimentacao,
+            'descricao': descricao_movimentacao_titulo_link.group(1).strip() + f' {subdescricao}'
+            if descricao_movimentacao_titulo_link
+            else descricao_movimentacao_titulo.group(1).strip() + f' {subdescricao}'
+        }
 
-        dadosMovimentacoesProcesso[data_movimentacao]['descricao_movimentacao'] = \
-            descricao_movimentacao_titulo_link.group(1).strip()\
-            if descricao_movimentacao_titulo_link else descricao_movimentacao_titulo.group(1).strip()
+        dadosMovimentacoesProcesso['movimentacoes'].append(row)
 
-        dadosMovimentacoesProcesso[data_movimentacao]['subdescricao'] = subdescricao
-
-    # return json.dumps(dadosMovimentacoesProcesso)
     return dadosMovimentacoesProcesso
 
 
 def peticoesProcesso(html_text):
     dadosPeticoesProcesso = {}
-    # \t<tr class="fundo.{5,6}">[\s\t]*<td[^>]*>((.|\s)+?)</td>
+    dadosPeticoesProcesso['peticoes'] = []
+
     partes = r'\t<tr class="fundo.{5,6}">((.|\s)+?)</tr>'
     for parte in re.findall(partes, html_text):
         parte_completa = ' '.join(parte)
         data_peticao = re.search(r'\t<td width="140"[^>]*>((.|\s)+?)</td>', parte_completa).group(1).strip()
-        tipo_peticao = re.search(r'\t<td width="\*"[^>]*>((.|\s)+?)</td>', parte_completa).group(1).strip()
+        tipo_peticao = re.search(r'\t<td width="\*"[^>]*>((.|\s)+?)<br/>', parte_completa).group(1).strip()
 
-        dadosPeticoesProcesso[data_peticao] = {}
-        dadosPeticoesProcesso[data_peticao]['tipo'] = tipo_peticao
+        row = {
+            'data_peticao': data_peticao,
+            'tipo_peticao': tipo_peticao
+        }
+
+        dadosPeticoesProcesso['peticoes'].append(row)
 
     return dadosPeticoesProcesso
