@@ -7,17 +7,18 @@ import re
 def dadosPrincipaisProcesso(html_text):
     dadosPrincipais = {}
 
-    dadosPrincipais['numero_processo'] = re.search(r'<span id="numeroProcesso"[^>]*>([^<]*)</span>',
+    dadosPrincipais['numero_processo'] = re.search(r'<span [^i]*id="numeroProcesso"[^>]*>([^<]*)</span>',
                                                    html_text).group(1).strip()
-    dadosPrincipais['classe_processo'] = re.search(r'<span id="classeProcesso"[^>]*>([^<]*)</span>',
-                                                   html_text).group(1).strip()
-    dadosPrincipais['assunto_processo'] = re.search(r'<span id="assuntoProcesso"[^>]*>([^<]*)</span>',
+    dadosPrincipais['classe_processo'] = re.search(r'<(div|span)(.*?)id="classeProcesso"[^>]*>( <span(.*?)>)?([^<]*)</',
+                                                   html_text).group(5).strip()
+    # <(div|span)(.*?)id="classeProcesso"[^>]*>
+    dadosPrincipais['assunto_processo'] = re.search(r'<span [^i]*id="assuntoProcesso"[^>]*>([^<]*)</span>',
                                                     html_text).group(1).strip()
-    dadosPrincipais['foro_processo'] = re.search(r'<span id="foroProcesso"[^>]*>([^<]*)</span>', html_text).group(
+    dadosPrincipais['foro_processo'] = re.search(r'<span [^i]*id="foroProcesso"[^>]*>([^<]*)</span>', html_text).group(
         1).strip()
-    dadosPrincipais['vara_processo'] = re.search(r'<span id="varaProcesso"[^>]*>([^<]*)</span>', html_text).group(
+    dadosPrincipais['vara_processo'] = re.search(r'<span [^i]*id="varaProcesso"[^>]*>([^<]*)</span>', html_text).group(
         1).strip()
-    dadosPrincipais['juiz_processo'] = re.search(r'<span id="juizProcesso"[^>]*>([^<]*)</span>', html_text).group(
+    dadosPrincipais['juiz_processo'] = re.search(r'<span [^i]*id="juizProcesso"[^>]*>([^<]*)</span>', html_text).group(
         1).strip()
     dadosPrincipais['distribuicao'] = re.search(r'<div id="dataHoraDistribuicaoProcesso">((.|\s)+?)</div>',
                                                 html_text).group(1).strip()

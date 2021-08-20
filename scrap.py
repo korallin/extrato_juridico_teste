@@ -11,7 +11,8 @@ https://www2.tjal.jus.br/cpopg/search.do;jsessionid=21EEB739CFE070D504F34C97BEB0
 
 
 """
-numeroProcesso = '0705677-72.2019.8.02.0001'
+# numeroProcesso = '0705677-72.2019.8.02.0001'
+numeroProcesso = '0705360-45.2017.8.02.0001'
 processoDados = {}
 
 
@@ -20,7 +21,11 @@ def numeroProcessoURL(numeroProcesso):
     numeroDigitoAnoUnificado = f'{regex[0]}-{regex[1]}.{regex[2]}'
     foroNumeroUnificado = regex[-1]
     valorConsultaUnificado = numeroProcesso
-    url_concatenada = f"https://www2.tjal.jus.br/cpopg/search.do?conversationId=&cbPesquisa=NUMPROC&numeroDigitoAnoUnificado={numeroDigitoAnoUnificado}&foroNumeroUnificado={foroNumeroUnificado}&dadosConsulta.valorConsultaNuUnificado={valorConsultaUnificado}&dadosConsulta.valorConsultaNuUnificado=UNIFICADO&dadosConsulta.valorConsulta=&dadosConsulta.tipoNuProcesso=UNIFICADO&uuidCaptcha="
+
+    # url_concatenada = f"https://www2.tjal.jus.br/cpopg5/search.do?conversationId=&cbPesquisa=NUMPROC&numeroDigitoAnoUnificado={numeroDigitoAnoUnificado}&foroNumeroUnificado={foroNumeroUnificado}&dadosConsulta.valorConsultaNuUnificado={valorConsultaUnificado}&dadosConsulta.valorConsultaNuUnificado=UNIFICADO&dadosConsulta.valorConsulta=&dadosConsulta.tipoNuProcesso=UNIFICADO&uuidCaptcha="
+
+    url_concatenada = f"https://www2.tjal.jus.br/cposg5/search.do?conversationId=&paginaConsulta=0&cbPesquisa=NUMPROC&numeroDigitoAnoUnificado={numeroDigitoAnoUnificado}&foroNumeroUnificado={foroNumeroUnificado}&dePesquisaNuUnificado={numeroProcesso}&dePesquisaNuUnificado=UNIFICADO&dePesquisa=&tipoNuProcesso=UNIFICADO"
+
     dados_processo(url_concatenada)
 
 
