@@ -36,16 +36,16 @@ def dados_processo(url_search):
 
     html_text = html_text.replace('&nbsp;', '')
 
-    principais = dadosPrincipaisProcesso(html_text)
+    # principais = dadosPrincipaisProcesso(html_text)
     partes = partesProcesso(html_text)
-    movimentacoes = movimentacoesProcesso(html_text)
-    peticoes = peticoesProcesso(html_text)
+    # movimentacoes = movimentacoesProcesso(html_text)
+    # peticoes = peticoesProcesso(html_text)
 
     processoDados[numeroProcesso] = {}
-    processoDados[numeroProcesso]['principais'] = principais
+    # processoDados[numeroProcesso]['principais'] = principais
     processoDados[numeroProcesso]['partes_processo'] = partes
-    processoDados[numeroProcesso]['movimentacoes_processo'] = movimentacoes
-    processoDados[numeroProcesso]['peticoes_processo'] = peticoes
+    # processoDados[numeroProcesso]['movimentacoes_processo'] = movimentacoes
+    # processoDados[numeroProcesso]['peticoes_processo'] = peticoes
 
     with open("unicodeFile.json", "w", encoding='utf-8') as write_file:
         json.dump(processoDados, write_file, ensure_ascii=False)

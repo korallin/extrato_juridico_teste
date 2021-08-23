@@ -11,29 +11,50 @@ def dadosPrincipaisProcesso(html_text):
                                                    html_text).group(1).strip()
     dadosPrincipais['classe_processo'] = re.search(r'<(div|span)(.*?)id="classeProcesso"[^>]*>( <span(.*?)>)?([^<]*)</',
                                                    html_text).group(5).strip()
-    # <(div|span)(.*?)id="classeProcesso"[^>]*>
-    dadosPrincipais['assunto_processo'] = re.search(r'<span [^i]*id="assuntoProcesso"[^>]*>([^<]*)</span>',
-                                                    html_text).group(1).strip()
-    dadosPrincipais['foro_processo'] = re.search(r'<span [^i]*id="foroProcesso"[^>]*>([^<]*)</span>', html_text).group(
-        1).strip()
-    dadosPrincipais['vara_processo'] = re.search(r'<span [^i]*id="varaProcesso"[^>]*>([^<]*)</span>', html_text).group(
-        1).strip()
-    dadosPrincipais['juiz_processo'] = re.search(r'<span [^i]*id="juizProcesso"[^>]*>([^<]*)</span>', html_text).group(
-        1).strip()
-    dadosPrincipais['distribuicao'] = re.search(r'<div id="dataHoraDistribuicaoProcesso">((.|\s)+?)</div>',
-                                                html_text).group(1).strip()
-    dadosPrincipais['controle'] = re.search(r'<div id="numeroControleProcesso">((.|\s)+?)</div>',
-                                            html_text).group(1).strip()
-    dadosPrincipais['area'] = re.search(r'<div id="areaProcesso"[^>]*>\s?<span[^>]*>((.|\s)+?)</span>',
-                                        html_text).group(1).strip()
-    dadosPrincipais['valor_acao'] = re.search(r'<div id="valorAcaoProcesso">((.|\s)+?)</div>',
-                                              html_text).group(1).strip()
 
-    # for id_principal in (
-    # "numeroProcesso", "classeProcesso", "assuntoProcesso", "foroProcesso", "varaProcesso", "juizProcesso"):
-    #     regex = re.search(rf'(<span id="{id_principal}"[^>]*>)(\s*.*)(\s*<\/span>)', html_text)
-    #     if rege
-    #     print(regex.group(2).strip())
+    dadosPrincipais['assunto_processo'] = re.search(
+        r'<(div|span)(.*?)id="assuntoProcesso"[^>]*>(\s?<span(.*?)>)?([^<]*)</',
+        html_text).group(5).strip()
+
+    dadosPrincipais['area'] = re.search(r'<div(.*?)id="areaProcesso"[^>]*>\s?<span[^>]*>((.|\s)+?)</span>',
+                                        html_text).group(2).strip()
+
+    dadosPrincipais['valor_acao'] = re.search(r'<div(.*?)id="valorAcaoProcesso">(<span[^>]*>)?([^<]*)</',
+                                              html_text).group(3).strip()
+
+    if re.search(r'Consulta\s?de\s?Processos\s?de\s?1º\s?Grau', html_text):
+        dadosPrincipais['foro_processo'] = re.search(r'<span [^i]*id="foroProcesso"[^>]*>([^<]*)</span>',
+                                                     html_text).group(
+            1).strip()
+
+        dadosPrincipais['vara_processo'] = re.search(r'<span [^i]*id="varaProcesso"[^>]*>([^<]*)</span>',
+                                                     html_text).group(
+            1).strip()
+
+        dadosPrincipais['juiz_processo'] = re.search(r'<span [^i]*id="juizProcesso"[^>]*>([^<]*)</span>',
+                                                     html_text).group(
+            1).strip()
+
+        dadosPrincipais['distribuicao'] = re.search(r'<div id="dataHoraDistribuicaoProcesso">((.|\s)+?)</div>',
+                                                    html_text).group(1).strip()
+
+        dadosPrincipais['controle'] = re.search(r'<div id="numeroControleProcesso">((.|\s)+?)</div>',
+                                                html_text).group(1).strip()
+
+    elif re.search(r'Consulta\s?de\s?Processos\s?de\s?2º\s?Grau', html_text):
+        dadosPrincipais['secao'] = re.search(r'<div(.*?)id="secaoProcesso">\s?<span[^>]*>(.*?)</', html_text).group(
+            2).strip()
+        dadosPrincipais['orgao_julgador'] = re.search(r'<div(.*?)id="orgaoJulgadorProcesso">\s?<span[^>]*>(.*?)</',
+                                                      html_text).group(2).strip()
+        dadosPrincipais['relatorProcesso'] = re.search(r'<div(.*?)id="relatorProcesso">\s?<span[^>]*>(.*?)</',
+                                                       html_text).group(2).strip()
+        dadosPrincipais['origem'] = re.search(r'<span[^>]*>Origem</span>\s*(.*?)<span[^>]*>(.*?)</',
+                                              html_text).group(2).strip()
+        dadosPrincipais['volume/apenso'] = re.search(r'<div(.*?)id="volumeApensoProcesso"><span[^>]*>(.*?)</',
+                                                     html_text).group(2).strip()
+
+    else:
+        return 'Instância do Processo não encontrada.'
 
     return dadosPrincipais
 
@@ -41,43 +62,40 @@ def dadosPrincipaisProcesso(html_text):
 def partesProcesso(html_text):
     dadosPartesProcesso = {}
     dadosPartesProcesso['partes'] = []
-    confrontante = []
-    terceiros = []
-    # html_text = html_text.replace('&nbsp;', '')
+    autor = ''
 
-    partes = r'<tr class="fundoClaro"[^>]*>[^<]*<td valign="top"[^>]*>((.|\s)+?)(\<\/tr\>)'
+    partes = r'<tr class="fundoClaro( polo.{5,7})?"[^>]*>[^<]*<td valign="top" width="141"[^>]*>((.|\s)+?)</tr>'
+
     for parte in re.findall(partes, html_text):
         parte_completa = ' '.join(parte)
         tipoDeParticipacao = re.search(r'<span class="mensagemExibindo tipoDeParticipacao">((.|\s)+?)</span>',
                                        parte_completa).group(1).strip()
-        nomeParteEAdvogado = re.search(r'<td class="nomeParteEAdvogado"[^>]*>((.|\s)+?)</td>', parte_completa).group(
-            1).strip()
+
+        nomeParteEAdvogado = re.search(r'<td(.*?)class="nomeParteEAdvogado"[^>]*>((.|\s)+?)</td>',
+                                       parte_completa).group(
+            2).strip()
 
         if 'span' in nomeParteEAdvogado:
+            autor = re.search(r'class="nomeParteEAdvogado"(.*?)?>((.|\s)+?)<', parte_completa).group(1).strip()
+            span = r'<span class="mensagemExibindo">(.*?)</span>(\s*)?((.|\s)+?)<'
+            for span_parte in re.findall(span, nomeParteEAdvogado):
+                autor += '\n' + span_parte[0] + f'{span_parte[2]}\n'
 
-            autor = re.search(r'<td class="nomeParteEAdvogado"[^>]*>((.|\s)+?)<br />', parte_completa).group(1).strip()
             row = {
-                'nome': autor,
-                'tipo_participacao': tipoDeParticipacao
+                'tipo_participacao': tipoDeParticipacao,
+                'nome': autor
             }
 
             if not row in dadosPartesProcesso['partes']:
                 dadosPartesProcesso['partes'].append(row)
+        else:
+            row = {
+                'tipo_participacao': tipoDeParticipacao,
+                'nome': nomeParteEAdvogado.strip()
+            }
 
-            nomeParteEAdvogado += '<end>'
-
-            advogado = re.search(r'<span class="mensagemExibindo">((.|\s)+?)</span>((.|\s)+?)<end>',
-                                 nomeParteEAdvogado).groups()
-            nomeParteEAdvogado = advogado[0].strip() + ' ' + advogado[2].strip()
-            tipoDeParticipacao = 'Advogado'
-
-        row = {
-            'nome': nomeParteEAdvogado.strip(),
-            'tipo_participacao': tipoDeParticipacao
-        }
-
-        if not row in dadosPartesProcesso['partes']:
-            dadosPartesProcesso['partes'].append(row)
+            if not row in dadosPartesProcesso['partes']:
+                dadosPartesProcesso['partes'].append(row)
 
     return dadosPartesProcesso
 
