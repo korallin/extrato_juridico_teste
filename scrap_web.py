@@ -104,28 +104,31 @@ def movimentacoesProcesso(html_text):
     dadosMovimentacoesProcesso = {}
     dadosMovimentacoesProcesso['movimentacoes'] = []
 
-    partes = r'<tr class="fundo.{5,6} containerMovimentacao"[^>]*>((.|\s)+?)</tr>'
+    partes = r'<tr class="fundo.{5,6} (containerMovimentacao|movimentacaoProcesso)"[^>]*>((.|\s)+?)</tr>'
     for parte in re.findall(partes, html_text):
         parte_completa = ' '.join(parte)
 
-        data_movimentacao = re.search(r'<td class="dataMovimentacao"[^>]*>((.|\s)+?)</td>', parte_completa).group(
-            1).strip()
+        data_movimentacao = re.search(
+            r'<td(.*?)class="(dataMovimentacao|dataMovimentacaoProcesso)"[^>]*>((.|\s)+?)</td>',
+            parte_completa).group(
+            3).strip()
 
-        descricao_movimentacao_titulo = re.search(r'<td class="descricaoMovimentacao"[^>]*>((.|\s)+?)<br />',
-                                                  parte_completa)
-
-        descricao_movimentacao_titulo_link = re.search(
-            r'<td class="descricaoMovimentacao"[^<]*<a class="linkMovVincProc"[^>]*>((.|\s)+?)</a>',
+        descricao_movimentacao_titulo = re.search(
+            r'<td(.*?)class="(descricaoMovimentacao|descricaoMovimentacaoProcesso)"[^>]*>((.|\s)+?)<br(\s)?/>',
             parte_completa)
 
-        subdescricao = re.search(r'<td class="descricaoMovimentacao"[^>]*>(.|\s)+?<span[^>]*>(('
-                                 r'.|\s)+?)</span>', parte_completa).group(2).strip()
+        descricao_movimentacao_titulo_link = re.search(
+            r'<td(.*?)class="(descricaoMovimentacao|descricaoMovimentacaoProcesso)"[^<]*<a class="linkMovVincProc"[^>]*>((.|\s)+?)</a>',
+            parte_completa)
+
+        # subdescricao = re.search(r'<td(.*?)?class="(descricaoMovimentacao|descricaoMovimentacaoProcesso)"((.|\s)+?)<span[^>]*>(\s*)?(.*?)(\s*)?</span>',
+        #     parte_completa).group(6).strip()
 
         row = {
             'data': data_movimentacao,
-            'descricao': descricao_movimentacao_titulo_link.group(1).strip() + f' {subdescricao}'
+            'descricao': descricao_movimentacao_titulo_link.group(3).strip()
             if descricao_movimentacao_titulo_link
-            else descricao_movimentacao_titulo.group(1).strip() + f' {subdescricao}'
+            else descricao_movimentacao_titulo.group(3).strip()
         }
 
         dadosMovimentacoesProcesso['movimentacoes'].append(row)
